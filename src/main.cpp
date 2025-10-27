@@ -86,28 +86,23 @@ void setup()
 // --- Loop ---
 void loop()
 {
-  // Blink LED if BLE connected
-  if (bleKeyboard.isConnected())
+  // Handle BLE connection
+  static bool clientConnected = false;
+
+  if (bleKeyboard.isConnected() && !clientConnected)
   {
-    if (!clientConnected)
-    {
-      clientConnected = true;
-      Serial.println("BLE client connected!");
-    }
-    if (millis() - ledLastToggle > ledInterval)
-    {
-      digitalWrite(ledPin, !digitalRead(ledPin));
-      ledLastToggle = millis();
-    }
+    clientConnected = true;
+    Serial.println("BLE client connected!");
+
+    // Blink LED once quickly
+    digitalWrite(ledPin, HIGH);
+    delay(200); // short blink
+    digitalWrite(ledPin, LOW);
   }
-  else
+  else if (!bleKeyboard.isConnected() && clientConnected)
   {
-    if (clientConnected)
-    {
-      clientConnected = false;
-      digitalWrite(ledPin, LOW);
-      Serial.println("BLE client disconnected!");
-    }
+    clientConnected = false;
+    Serial.println("BLE client disconnected!");
   }
 
   // Handle text input
