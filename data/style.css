@@ -1,0 +1,50 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: #1e1e2e;
+  color: #eee;
+  padding: 20px;
+}
+h1 {
+  color: #00ffff;
+}
+select {
+  font-size: 1em;
+  margin: 10px;
+  padding: 5px;
+  border-radius: 6px;
+}
+.panel {
+  display: none;
+  background: #2b2b3b;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  width: 320px;
+}
+button {
+  margin: 5px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: #00ffff;
+  color: #000;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover {
+  background: #00cccc;
+}
+textarea {
+  width: 90%;
+  height: 80px;
+  border-radius: 8px;
+  border: none;
+  padding: 8px;
+  font-size: 1em;
+}
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}

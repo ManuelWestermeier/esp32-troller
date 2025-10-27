@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iPad Remote Keyboard</title>
+</head>
+<body>
+  <h1>iPad Remote Keyboard</h1>
+  
+  <input type="text" id="textInput" placeholder="Type text or URL here">
+  <button onclick="sendText()">Send Text</button>
+  
+  <h2>Shortcuts</h2>
+  <button onclick="sendShortcut('openSafari')">Open Safari</button>
+  <button onclick="sendShortcut('switchTab')">Next Tab</button>
+  <button onclick="sendShortcut('closeApp')">Close App</button>
+  <button onclick="sendShortcut('minimize')">Home / Minimize</button>
+
+<script>
+function sendText() {
+  const data = document.getElementById('textInput').value;
+  fetch('/sendText', {method:'POST', body: new URLSearchParams({data})});
+}
+
+function sendShortcut(action) {
+  fetch('/shortcut', {method:'POST', body: new URLSearchParams({action})});
+}
+</script>
+</body>
+</html>
