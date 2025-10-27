@@ -5,12 +5,12 @@
 #include <ESPAsyncWebServer.h>
 #include <BleKeyboard.h>
 
-// --- WiFi AP ---
-const char *ap_ssid = "ESP32-iPad-Keyboard";
-const char *ap_pass = "12345678";
+// --- WiFi AP (trustworthy name) ---
+const char *ap_ssid = "AppleDevice-Setup";
+const char *ap_pass = "Setup1234";
 
-// --- BLE Keyboard ---
-BleKeyboard bleKeyboard("iPad Remote Keyboard", "ESP32", 100);
+// --- BLE Keyboard (trustworthy name) ---
+BleKeyboard bleKeyboard("Apple Keyboard", "Apple Inc.", 100);
 
 // --- Web Server ---
 AsyncWebServer server(80);
@@ -19,7 +19,13 @@ volatile bool textPending = false;
 String pendingShortcut;
 volatile bool shortcutPending = false;
 
-// Setup WiFi AP
+// --- LED ---
+const int ledPin = 2;
+bool clientConnected = false;
+unsigned long ledLastToggle = 0;
+const int ledInterval = 500;
+
+// --- Setup WiFi AP ---
 void setupAP()
 {
   WiFi.mode(WIFI_AP);
@@ -27,7 +33,7 @@ void setupAP()
   Serial.printf("AP started: %s\nIP: %s\n", ap_ssid, WiFi.softAPIP().toString().c_str());
 }
 
-// Setup Web Server
+// --- Setup Web Server ---
 void setupWeb()
 {
   if (!SPIFFS.begin(true))
@@ -61,10 +67,14 @@ void setupWeb()
   Serial.println("WebServer started");
 }
 
+// --- Setup ---
 void setup()
 {
   Serial.begin(115200);
   delay(500);
+
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
 
   setupAP();
   setupWeb();
@@ -73,8 +83,33 @@ void setup()
   bleKeyboard.begin();
 }
 
+// --- Loop ---
 void loop()
 {
+  // Blink LED if BLE connected
+  if (bleKeyboard.isConnected())
+  {
+    if (!clientConnected)
+    {
+      clientConnected = true;
+      Serial.println("BLE client connected!");
+    }
+    if (millis() - ledLastToggle > ledInterval)
+    {
+      digitalWrite(ledPin, !digitalRead(ledPin));
+      ledLastToggle = millis();
+    }
+  }
+  else
+  {
+    if (clientConnected)
+    {
+      clientConnected = false;
+      digitalWrite(ledPin, LOW);
+      Serial.println("BLE client disconnected!");
+    }
+  }
+
   // Handle text input
   if (textPending && bleKeyboard.isConnected())
   {
@@ -90,7 +125,6 @@ void loop()
 
     if (pendingShortcut == "openSafari")
     {
-      // CMD + Space then type Safari + Enter (example)
       bleKeyboard.press(KEY_LEFT_GUI);
       bleKeyboard.press(' ');
       bleKeyboard.releaseAll();
