@@ -1,92 +1,399 @@
+<!-- data/index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Apple Keyboard Remote</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Apple Keyboard Remote — Chains</title>
     <style>
+      :root {
+        --bg: #0f1222;
+        --panel: #161827;
+        --accent: #00d0ff;
+        --muted: #9aa3b2;
+        --btn: #00d0ff;
+        --btn-hover: #00b8df;
+      }
+      html,
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        text-align: center;
-        background-color: #f5f5f5;
-        color: #333;
+        height: 100%;
         margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: linear-gradient(180deg, #0c0f1a, #121428);
+        color: #e8f0f6;
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 20px auto;
         padding: 20px;
       }
       h1 {
-        color: #007aff;
+        margin: 0 0 8px;
+        color: var(--accent);
       }
-      input[type="text"] {
-        width: 80%;
+      p.lead {
+        color: var(--muted);
+        margin-top: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        background: var(--panel);
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      }
+
+      input[type="text"],
+      textarea,
+      select {
+        width: 100%;
+        border: none;
+        border-radius: 8px;
         padding: 10px;
-        margin: 10px 0;
-        font-size: 1.1em;
-        border-radius: 8px;
-        border: 1px solid #ccc;
+        font-size: 15px;
+        outline: none;
+        background: #0b0f19;
+        color: #eaf6ff;
+        box-sizing: border-box;
       }
-      button {
-        padding: 12px 20px;
-        margin: 5px;
-        font-size: 1em;
-        border-radius: 8px;
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: var(--btn);
+        color: #021014;
+        font-weight: 700;
         border: none;
         cursor: pointer;
+      }
+      .btn.secondary {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        font-weight: 600;
+      }
+      .btn.danger {
+        background: #ff4d6d;
         color: #fff;
-        background-color: #007aff;
-        transition: background 0.3s;
       }
-      button:hover {
-        background-color: #0051a8;
+      .btn:active {
+        transform: translateY(1px);
       }
-      .shortcut-buttons {
+
+      ul.chain-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 520px;
+        overflow: auto;
+      }
+      li.chain-item {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 8px;
+        align-items: center;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.01),
+          transparent
+        );
+        margin-bottom: 8px;
+      }
+      .chain-meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      /* touch-friendly */
+      button,
+      input,
+      textarea {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      input {
+        autocapitalize: off;
+        autocorrect: off;
+        spellcheck: false;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
       }
     </style>
   </head>
   <body>
-    <h1>Apple Keyboard Remote</h1>
+    <div class="wrap">
+      <h1>Apple Keyboard Remote</h1>
+      <p class="lead">
+        Create named chains (macro / todo-like lists), edit, save and run them.
+        Supports modifier combos like <code>{ctrl+shift}+t</code> or named keys
+        <code>{enter}</code>.
+      </p>
 
-    <input
-      type="text"
-      id="textInput"
-      placeholder="Type text, URL, or command"
-    />
-    <button onclick="sendText()">Send Text</button>
+      <div class="grid">
+        <!-- left: editor & actions -->
+        <div class="panel">
+          <h3 id="editorTitle">Edit / Create Chain</h3>
+          <div style="margin-top: 8px">
+            <input
+              type="text"
+              id="chainName"
+              placeholder="Chain name (unique)"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+            />
+          </div>
 
-    <h2>Shortcuts</h2>
-    <div class="shortcut-buttons">
-      <button onclick="sendShortcut('openSafari')">Open Safari</button>
-      <button onclick="sendShortcut('switchTab')">Next Tab</button>
-      <button onclick="sendShortcut('closeApp')">Close App</button>
-      <button onclick="sendShortcut('minimize')">Home / Minimize</button>
-    </div>
+          <div style="margin-top: 10px">
+            <label class="hint"
+              >Commands (each line or separated by semicolon ;). Use {ctrl},
+              {shift}, {alt}, {meta}, {enter}, {tab}, {left}, {right}, {up},
+              {down}, {esc}, {backspace}</label
+            >
+            <textarea
+              id="chainData"
+              placeholder="Type one command per line. Examples:
+Open Safari:
+{meta}+space
+Safari
+{enter}
 
-    <h2>Quick Actions</h2>
-    <div class="shortcut-buttons">
-      <button onclick="sendShortcut('copy')">Copy</button>
-      <button onclick="sendShortcut('paste')">Paste</button>
-      <button onclick="sendShortcut('undo')">Undo</button>
-      <button onclick="sendShortcut('redo')">Redo</button>
+Copy/paste:
+{ctrl}+c
+{ctrl}+v"
+            ></textarea>
+          </div>
+
+          <div style="margin-top: 10px" class="row">
+            <button class="btn" id="saveBtn">Save Chain</button>
+            <button class="btn secondary" id="clearBtn">Clear</button>
+            <button class="btn secondary" id="newBtn">New</button>
+          </div>
+
+          <div style="margin-top: 14px">
+            <h4>Quick Text</h4>
+            <div class="row">
+              <input
+                type="text"
+                id="textInput"
+                placeholder="Type text to send (iPad-friendly)"
+                inputmode="text"
+              />
+              <button class="btn" id="sendTextBtn">Send</button>
+            </div>
+
+            <div class="row" style="margin-top: 8px">
+              <button class="btn secondary" onclick="sendShortcut('copy')">
+                Copy
+              </button>
+              <button class="btn secondary" onclick="sendShortcut('paste')">
+                Paste
+              </button>
+              <button class="btn secondary" onclick="sendShortcut('undo')">
+                Undo
+              </button>
+              <button class="btn secondary" onclick="sendShortcut('redo')">
+                Redo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- right: list & run -->
+        <div class="panel">
+          <h3>Stored Chains</h3>
+          <div style="margin-top: 8px">
+            <ul class="chain-list" id="chainList"></ul>
+            <div id="noChains" class="hint">
+              No chains yet. Create one on the left and press Save.
+            </div>
+          </div>
+          <div style="margin-top: 12px">
+            <h4>How to write combos</h4>
+            <p class="hint">
+              Examples: <code>{ctrl}+c</code>, <code>{meta}+space</code>,
+              <code>{ctrl+shift}+n</code>, <code>{enter}</code>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-      function sendText() {
+      async function fetchChains() {
+        try {
+          const r = await fetch("/chains");
+          if (!r.ok) throw new Error("Failed");
+          const data = await r.json();
+          return data;
+        } catch (e) {
+          console.error(e);
+          return [];
+        }
+      }
+
+      function el(tag, props = {}, ...children) {
+        const e = document.createElement(tag);
+        for (const k in props) {
+          if (k === "class") e.className = props[k];
+          else e.setAttribute(k, props[k]);
+        }
+        children.forEach((c) => {
+          if (typeof c === "string") e.appendChild(document.createTextNode(c));
+          else if (c) e.appendChild(c);
+        });
+        return e;
+      }
+
+      async function refreshList() {
+        const list = document.getElementById("chainList");
+        list.innerHTML = "";
+        const data = await fetchChains();
+        if (!data || data.length === 0) {
+          document.getElementById("noChains").style.display = "block";
+          return;
+        }
+        document.getElementById("noChains").style.display = "none";
+        for (const c of data) {
+          const li = el("li", { class: "chain-item" });
+          const left = el(
+            "div",
+            {},
+            el("div", {}, el("strong", {}, c.name)),
+            el(
+              "div",
+              { class: "chain-meta" },
+              (c.commands ? c.commands.length : 0) + " commands"
+            )
+          );
+          const actions = el("div", { class: "controls" });
+          const loadBtn = el("button", { class: "btn secondary" }, "Load");
+          loadBtn.onclick = () => loadChain(c.name);
+          const runBtn = el("button", { class: "btn" }, "Run");
+          runBtn.onclick = () => runChain(c.name);
+          const delBtn = el("button", { class: "btn danger" }, "Delete");
+          delBtn.onclick = () => deleteChain(c.name);
+          actions.appendChild(loadBtn);
+          actions.appendChild(runBtn);
+          actions.appendChild(delBtn);
+          li.appendChild(left);
+          li.appendChild(actions);
+          list.appendChild(li);
+        }
+      }
+
+      async function saveChain() {
+        const name = document.getElementById("chainName").value.trim();
+        const commands = document.getElementById("chainData").value;
+        if (!name) {
+          alert("Name required");
+          return;
+        }
+        await fetch("/chain", {
+          method: "POST",
+          body: new URLSearchParams({ name, commands }),
+        });
+        await refreshList();
+        alert("Saved");
+      }
+
+      async function loadChain(name) {
+        const r = await fetch("/chain?name=" + encodeURIComponent(name));
+        if (!r.ok) return alert("Failed to load");
+        const data = await r.json();
+        document.getElementById("chainName").value = data.name;
+        document.getElementById("chainData").value = data.commands.join("\\n");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      async function runChain(name) {
+        await fetch("/runChain", {
+          method: "POST",
+          body: new URLSearchParams({ name }),
+        });
+        // small feedback
+        alert("Sent run request for " + name);
+      }
+
+      async function deleteChain(name) {
+        if (!confirm('Delete "' + name + '"?')) return;
+        await fetch("/deleteChain", {
+          method: "POST",
+          body: new URLSearchParams({ name }),
+        });
+        await refreshList();
+      }
+
+      async function sendText() {
         const data = document.getElementById("textInput").value;
-        fetch("/sendText", {
+        if (!data) return;
+        await fetch("/sendText", {
           method: "POST",
           body: new URLSearchParams({ data }),
         });
         document.getElementById("textInput").value = "";
       }
 
-      function sendShortcut(action) {
-        fetch("/shortcut", {
+      async function sendShortcut(action) {
+        await fetch("/shortcut", {
           method: "POST",
           body: new URLSearchParams({ action }),
         });
+        alert("Shortcut: " + action);
       }
+
+      document.getElementById("saveBtn").addEventListener("click", saveChain);
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        document.getElementById("chainName").value = "";
+        document.getElementById("chainData").value = "";
+      });
+      document.getElementById("newBtn").addEventListener("click", () => {
+        document.getElementById("chainName").value = "";
+        document.getElementById("chainData").value = "";
+        document.getElementById("chainName").focus();
+      });
+      document
+        .getElementById("sendTextBtn")
+        .addEventListener("click", sendText);
+
+      // allow pressing Cmd/Enter on iPad (some virtual keyboards) to send? We'll just provide the button.
+      // Initialize
+      window.addEventListener("load", () => {
+        refreshList();
+        // Prevent iOS auto-zoom on input focus by setting font-size on inputs if need be. Already adequate.
+      });
     </script>
   </body>
 </html>
